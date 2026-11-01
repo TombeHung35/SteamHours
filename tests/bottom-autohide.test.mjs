@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {stripTypeScriptTypes} from 'node:module';
+import {runInNewContext} from 'node:vm';
+const read=p=>readFileSync(new URL('../harmony/entry/src/main/ets/'+p,import.meta.url),'utf8').replace(/^import[^\n]*\n/gm,'').replace(/\bexport /g,'');
+const Model=runInNewContext(stripTypeScriptTypes(read('model/BottomBarAutoHide.ets'))+'\nBottomBarAutoHide');
+test('The initial/top region and subpixel jitter never hide the actions',()=>{const m=new Model();for(const y of [0,6,20,50,80,80.2,80.1])assert.equal(m.update(y,true,true,false),false);});
+test('Downward reading hides after threshold; upward motion needs only 12vp to restore without flicker',()=>{const m=new Model();m.reset(120);assert.equal(m.update(135,true,true,false),false);assert.equal(m.update(158,true,true,false),false);assert.equal(m.update(160,true,true,false),true);assert.equal(m.update(155,true,true,false),true);assert.equal(m.update(148,true,true,false),false);});
+test('Direction changes and idle/programmatic events do not accumulate an unrelated gesture',()=>{const m=new Model();m.reset(120);m.update(145,true,true,false);m.update(140,true,true,false);assert.equal(m.update(165,true,true,false),false);assert.equal(m.update(400,true,false,false),false);assert.equal(m.update(420,true,true,false),false);assert.equal(m.update(440,true,true,false),true);assert.equal(m.update(500,true,false,false),true);});
+test('The top, bottom, disabled interaction and reset always restore access to navigation',()=>{for(const mode of ['top','bottom','inactive','reset']){const m=new Model();assert.equal(m.update(200,true,true,false),true);if(mode==='reset'){m.reset(200);assert.equal(m.update(200,true,false,false),false);}else assert.equal(m.update(mode==='top'?0:220,mode!=='inactive',true,mode==='bottom'),false);}});
+test('Unknown offsets and over-scroll cannot poison the threshold or trap the bar',()=>{const m=new Model();assert.equal(m.update(200,true,true,false),true);for(const value of [NaN,Infinity,-Infinity])assert.equal(m.update(value,true,true,false),true);assert.equal(m.update(-30,true,true,false),false);assert.equal(m.update(200,true,true,true),false);});

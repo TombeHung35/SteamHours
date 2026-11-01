@@ -1,0 +1,8 @@
+{
+  "modelVersion": "5.0.0",
+  "name": "steam-hours",
+  "version": "0.3.24",
+  "description": "Steam playtime viewer",
+  "dependencies": {},
+  "devDependencies": {}
+}

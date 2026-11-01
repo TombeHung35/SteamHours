@@ -1,0 +1,31 @@
+# Local configuration and credentials
+**/local.properties
+.env
+.env.*
+!.env.example
+**/signing/
+*.p12
+*.pfx
+*.p7b
+*.cer
+*.crt
+*.csr
+*.pem
+*.key
+*.jks
+*.keystore
+# SDK and generated files
+**/.hvigor/
+**/oh_modules/
+**/build/
+node_modules/
+*.hap
+*.app
+*.zip
+*.log
+# IDE and operating system
+**/.idea/
+**/.vscode/
+.DS_Store
+Thumbs.db
+*.iml

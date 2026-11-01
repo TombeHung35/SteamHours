@@ -1,0 +1,14 @@
+{
+  "name": "steamhours",
+  "version": "0.3.24",
+  "private": true,
+  "description": "HarmonyOS Steam library, playtime, achievements and family sharing viewer",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "test": "node scripts/test.mjs",
+    "test:full": "node scripts/test.mjs --compiled"
+  }
+}

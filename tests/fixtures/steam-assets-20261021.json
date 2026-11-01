@@ -1,0 +1,77 @@
+{
+  "response": {
+    "store_items": [
+      {
+        "appid": 2807960,
+        "assets": {
+          "asset_url_format": "steam/apps/2807960/${FILENAME}?t=1792168547",
+          "main_capsule": "c5f4d3052a8664191d778e404bea589a78f000bf/capsule_616x353_alt_assets_24_schinese.jpg",
+          "main_capsule_2x": "c5f4d3052a8664191d778e404bea589a78f000bf/capsule_616x353_alt_assets_24_schinese_2x.jpg",
+          "small_capsule": "d7ae078e0a543a97ff5a5d72165999535b0b1cdc/capsule_231x87.jpg",
+          "small_capsule_2x": "d7ae078e0a543a97ff5a5d72165999535b0b1cdc/capsule_231x87_2x.jpg",
+          "header": "c12d12ce3c7d217398d3fcad77427bfc9d57c570/header.jpg",
+          "header_2x": "c12d12ce3c7d217398d3fcad77427bfc9d57c570/header_2x.jpg",
+          "page_background": "d127c8b4a1c85122b8aeffdd00163b318b8c2a41/page_bg_v6.jpg",
+          "hero_capsule": "4bf05302e4ac2086fed8a75ed7cd0673602b2c62/hero_capsule.jpg",
+          "hero_capsule_2x": "4bf05302e4ac2086fed8a75ed7cd0673602b2c62/hero_capsule_2x.jpg",
+          "library_capsule": "5efba891507f611d94ef6685cc2af7cd0640f55d/library_capsule.jpg",
+          "library_capsule_2x": "5efba891507f611d94ef6685cc2af7cd0640f55d/library_capsule_2x.jpg",
+          "library_hero": "7165682cb6055d92bd2aafd940edbe70cb33ff6b/library_hero.jpg",
+          "library_hero_2x": "7165682cb6055d92bd2aafd940edbe70cb33ff6b/library_hero_2x.jpg",
+          "community_icon": "3059e94fb89816fe1929a238ac2b55e8be348408",
+          "page_background_path": "app/2807960?t=1792168547",
+          "raw_page_background": "d127c8b4a1c85122b8aeffdd00163b318b8c2a41/page_bg_raw.jpg",
+          "edition_comparison": "4ba985a8e2bde3d7f56eb68fd36f4a9680bd698c/edition_comparision_schinese.png",
+          "last_modified": 1792168547
+        }
+      },
+      {
+        "appid": 2288340,
+        "assets": {
+          "asset_url_format": "steam/apps/2288340/${FILENAME}?t=1792128424",
+          "main_capsule": "3bd993fa9f94ebd60c1b05dd61a4315cde829830/capsule_616x353.jpg",
+          "main_capsule_2x": "3bd993fa9f94ebd60c1b05dd61a4315cde829830/capsule_616x353_2x.jpg",
+          "small_capsule": "f72b0d0ef7d7beed96998f1ac0bdfb788a01845f/capsule_231x87.jpg",
+          "small_capsule_2x": "f72b0d0ef7d7beed96998f1ac0bdfb788a01845f/capsule_231x87_2x.jpg",
+          "header": "13dea8084135fd130605b78189c82e39bf944c35/header.jpg",
+          "header_2x": "13dea8084135fd130605b78189c82e39bf944c35/header_2x.jpg",
+          "page_background": "4b28102e4f8702f48bfc03e099246a55a200204f/page_bg_v6.jpg",
+          "hero_capsule": "4291807b6d59b2fa714545be8b17034a17948280/hero_capsule.jpg",
+          "hero_capsule_2x": "4291807b6d59b2fa714545be8b17034a17948280/hero_capsule_2x.jpg",
+          "library_capsule": "a1fb5685d2c140309d5549af1ddc725a7114d889/library_capsule.jpg",
+          "library_capsule_2x": "a1fb5685d2c140309d5549af1ddc725a7114d889/library_capsule_2x.jpg",
+          "library_hero": "2cb2890597c98cd90bc85e609dbb41645d269ad6/library_hero.jpg",
+          "library_hero_2x": "2cb2890597c98cd90bc85e609dbb41645d269ad6/library_hero_2x.jpg",
+          "community_icon": "76b733005ae5a10204c734a9a4a278c92f3a29c3",
+          "page_background_path": "app/2288340?t=1792128424",
+          "raw_page_background": "4b28102e4f8702f48bfc03e099246a55a200204f/page_bg_raw.jpg",
+          "edition_comparison": "53e4ebeb35bc37c0093337d332b3d5a2e9386424/edition_comparision_schinese.png",
+          "last_modified": 1792128424
+        }
+      },
+      {
+        "appid": 3405690,
+        "assets": {
+          "asset_url_format": "steam/apps/3405690/${FILENAME}?t=1789751159",
+          "main_capsule": "7a4a2467300194840eb2116c2126c2d2422b4e12/capsule_616x353.jpg",
+          "main_capsule_2x": "7a4a2467300194840eb2116c2126c2d2422b4e12/capsule_616x353_2x.jpg",
+          "small_capsule": "abca0fd9695521a046d407327d82f808162315f7/capsule_231x87.jpg",
+          "small_capsule_2x": "abca0fd9695521a046d407327d82f808162315f7/capsule_231x87_2x.jpg",
+          "header": "2d96aa1b06e453cd62dae9029d412f19e61932c3/header.jpg",
+          "header_2x": "2d96aa1b06e453cd62dae9029d412f19e61932c3/header_2x.jpg",
+          "page_background": "44dcd20ada52561b2a1ab2d9254ca49bc71628a9/page_bg_v6.jpg",
+          "hero_capsule": "92cec30c4b24d581ea110d9f3ead824abcba48c4/hero_capsule.jpg",
+          "hero_capsule_2x": "92cec30c4b24d581ea110d9f3ead824abcba48c4/hero_capsule_2x.jpg",
+          "library_capsule": "3e62e7456809a5cf182104711ed7465762d3b5fb/library_capsule.jpg",
+          "library_capsule_2x": "3e62e7456809a5cf182104711ed7465762d3b5fb/library_capsule_2x.jpg",
+          "library_hero": "d32943b4fdbf90b6541c3fbfe2b7cda9c33e8e6e/library_hero.jpg",
+          "library_hero_2x": "d32943b4fdbf90b6541c3fbfe2b7cda9c33e8e6e/library_hero_2x.jpg",
+          "community_icon": "8bc71e018a346f575c4b1bc6ed42a06c15e8e454",
+          "page_background_path": "app/3405690?t=1789751159",
+          "raw_page_background": "44dcd20ada52561b2a1ab2d9254ca49bc71628a9/page_bg_raw.jpg",
+          "last_modified": 1789751159
+        }
+      }
+    ]
+  }
+}

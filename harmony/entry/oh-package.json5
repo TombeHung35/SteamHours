@@ -1,0 +1,6 @@
+{
+  "name": "entry",
+  "version": "0.3.24",
+  "description": "SteamHours native entry",
+  "dependencies": {}
+}
