@@ -355,7 +355,10 @@ test('Compiled main pages extend the entire scroll drawing chain to the home ind
     assert.ok(native.trace.indexOf('decoration') < native.trace.indexOf('navigation'));
     assert.deepEqual(native.navigationColors, ['#00000000']);
     assert.equal(native.foregroundBlurs.length, 1);
-    assert.equal(native.safeAreas.filter(([, , edges]) => Array.from(edges).join(',') === '0,1').length, 2);
+    assert.equal(native.safeAreas.filter(([, , edges]) => Array.from(edges).join(',') === '0,1').length, 3);
+    const navigationArea = native.safeAreas.filter(event => event[0] === 'Navigation');
+    assert.equal(navigationArea.length, 1);
+    assert.deepEqual(Array.from(navigationArea[0][2]), [0, 1]);
     const content = native.safeAreas.filter(([, , edges]) => Array.from(edges).join(',') === '1');
     assert.deepEqual(content.map(event => event[0]).sort(), ['Scroll', 'Stack', 'TabContent']);
     assert.ok(native.safeAreas.every(([, types]) => Array.from(types).join(',') === '1'));
@@ -372,7 +375,7 @@ test('Custom background and scroll extend system drawing without expanding contr
     assert.equal(native.safeAreas.filter(event => event[0] === 'Image').length, 1);
     assert.equal(native.safeAreas.filter(event => event[0] === 'Scroll').length, 1);
     assert.equal(native.safeAreas.filter(event => event[0] === 'TabContent').length, 1);
-    assert.equal(native.safeAreas.length, 6);
+    assert.equal(native.safeAreas.length, 7);
     assert.ok(native.safeAreas.every(event => Array.from(event[1]).join(',') === '1'));
     assert.equal(owner.bottomBarVisible(), !keyboardVisible);
     assert.equal(owner.backgroundPath, '/test-background.jpg');

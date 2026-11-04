@@ -1,5 +1,5 @@
 import { deviceInfo } from '@kit.BasicServicesKit';
-import { uiMaterial, LengthMetrics } from '@kit.ArkUI';
+import { uiMaterial } from '@kit.ArkUI';
 import { AppearanceMode, AppColors, colorsFor, normalizeThemeColor } from '../model/Appearance';
 
 // The modifier itself exists on API 12; new material APIs are called only after the capability check.
@@ -150,12 +150,12 @@ export class ImmersiveTheme {
   }
 
   titleOptions(): NavigationTitleOptions {
-    // Keep official scroll blur and its transition metrics stable, without a status-bar-edge shadow.
+    // Keep one native backdrop behind the title and expanded status-bar area.
+    // GRADUAL_BLUR hides its filter during fast flings, then restores it on stop.
     if (this.stableTitleOptions === undefined) {
       this.stableTitleOptions = this.enabled ?
         { backgroundColor: '#00000000', barStyle: BarStyle.STACK, systemMaterial: this.title,
-          scrollEffectOptions: { scrollEffectType: ScrollEffectType.GRADUAL_BLUR,
-            blurEffectiveStartOffset: LengthMetrics.vp(0), blurEffectiveEndOffset: LengthMetrics.vp(64) } } :
+          backgroundEffect: { radius: 32, saturation: 1.15, color: '#1A' + this.colors.background.substring(1) } } :
         { backgroundColor: this.colors.background, barStyle: BarStyle.STANDARD };
     }
     return this.stableTitleOptions;

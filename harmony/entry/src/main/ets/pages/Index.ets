@@ -1345,6 +1345,8 @@ struct Index {
             .onAppear(() => { this.bottomBarMotion.reset(); this.bottomBarMounted = true; this.syncBottomBar(false); })
             .onDisAppear(() => { this.bottomBarMounted = false; this.bottomBarMotion.reset(); })
           }.width('100%').height('100%').backgroundColor('#00000000').mode(NavigationMode.Stack).hideBackButton(true)
+          // Extend the same native title backdrop across the status bar without changing control insets.
+          .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
           .titleMode(NavigationTitleMode.Mini)
           .title({ builder: this.pageTitle, height: 80 }, this.theme().titleOptions())
           .navDestination(this.destination)

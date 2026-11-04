@@ -10,7 +10,7 @@ const palette = readFileSync(new URL('../harmony/entry/src/main/ets/model/Appear
 const code = stripTypeScriptTypes(palette + '\n' + source) + '\n({ immersiveFor, floatingActionBarWidth })';
 function theme(sdkApiVersion, material, mode = 'night') {
   const deviceInfo = { sdkApiVersion, apiAvailable: () => sdkApiVersion >= 26 };
-  return runInNewContext(code, { deviceInfo, uiMaterial: material, LengthMetrics: { vp: value => ({ value, unit: 'vp' }) }, BarStyle: { STANDARD: 0, STACK: 1 }, ScrollEffectType: { GRADUAL_BLUR: 1 } }).immersiveFor(mode);
+  return runInNewContext(code, { deviceInfo, uiMaterial: material, BarStyle: { STANDARD: 0, STACK: 1 } }).immersiveFor(mode);
 }
 function applyAll(value, control) {
   for (const modifier of [value.button, value.primary, value.bottomButton, value.bottomPrimary, value.danger, value.select, value.toggle, value.tabsStyle(true), value.tabsStyle(false)]) modifier.applyNormalAttribute(control);
@@ -79,7 +79,7 @@ test('Switching material themes reuses each variant and keeps day foregrounds da
     isImmersiveMaterialSupported: () => true, ImmersiveStyle: { THIN: 1, REGULAR: 2, THICK: 3 },
     ImmersiveMaterial: class { constructor(options) { this.options = options; created += 1; } }
   };
-  const { immersiveFor } = runInNewContext(code, { deviceInfo, uiMaterial, LengthMetrics: { vp: value => ({ value, unit: 'vp' }) }, BarStyle: { STANDARD: 0, STACK: 1 }, ScrollEffectType: { GRADUAL_BLUR: 1 } });
+  const { immersiveFor } = runInNewContext(code, { deviceInfo, uiMaterial, BarStyle: { STANDARD: 0, STACK: 1 } });
   const day = immersiveFor('day');
   const night = immersiveFor('night');
   const count = created;
@@ -113,7 +113,8 @@ test('Official bottom bar restores when the keyboard opens and does not create n
   assert.equal(calls[2].systemMaterial, initial.systemMaterial);
   assert.equal(calls[2].maskColor, '#00000000');
   assert.equal(calls[2].maskHeight, 0);
-  assert.equal(value.titleOptions().scrollEffectOptions.scrollEffectType, 1);
+  assert.equal(value.titleOptions().backgroundEffect.radius, 32);
+  assert.equal(value.titleOptions().scrollEffectOptions, undefined);
 });
 
 test('Custom material tint/foreground follow the palette and each mode reuses its current custom material', () => {
@@ -122,7 +123,7 @@ test('Custom material tint/foreground follow the palette and each mode reuses it
     deviceInfo: { sdkApiVersion: 26, apiAvailable: () => true },
     uiMaterial: { isImmersiveMaterialSupported: () => true, ImmersiveStyle: { THIN: 1, REGULAR: 2, THICK: 3 },
       ImmersiveMaterial: class { constructor(options) { this.options = options; created.push(options); } } },
-    LengthMetrics: { vp: value => ({ value, unit: 'vp' }) }, BarStyle: { STANDARD: 0, STACK: 1 }, ScrollEffectType: { GRADUAL_BLUR: 1 }
+    BarStyle: { STANDARD: 0, STACK: 1 },
   });
   const first = instance.immersiveFor('night', '#FFFFFF');
   const count = created.length;
@@ -143,7 +144,7 @@ test('Official floating width follows phone/tablet viewport changes and reserves
     deviceInfo: { sdkApiVersion: 26, apiAvailable: () => true },
     uiMaterial: { isImmersiveMaterialSupported: () => true, ImmersiveStyle: { THIN: 1, REGULAR: 2, THICK: 3 },
       ImmersiveMaterial: class { constructor(options) { this.options = options; created.push(options); } } },
-    LengthMetrics: { vp: value => ({ value, unit: 'vp' }) }, BarStyle: { STANDARD: 0, STACK: 1 }, ScrollEffectType: { GRADUAL_BLUR: 1 }
+    BarStyle: { STANDARD: 0, STACK: 1 },
   });
   const value = api.immersiveFor('night');
   const count = created.length; let initialMaterial;
@@ -165,7 +166,7 @@ test('Missing/invalid viewport sizes have a stable positive fallback; keyboard h
   const api = runInNewContext(code, {
     deviceInfo: { sdkApiVersion: 26, apiAvailable: () => true },
     uiMaterial: { isImmersiveMaterialSupported: () => true, ImmersiveStyle: { THIN: 1, REGULAR: 2, THICK: 3 }, ImmersiveMaterial: class {} },
-    LengthMetrics: { vp: value => ({ value, unit: 'vp' }) }, BarStyle: { STANDARD: 0, STACK: 1 }, ScrollEffectType: { GRADUAL_BLUR: 1 }
+    BarStyle: { STANDARD: 0, STACK: 1 },
   });
   for (const size of [0, -1, NaN, Infinity]) assert.equal(api.floatingActionBarWidth(size), 320);
   assert.equal(api.floatingActionBarWidth(1), 1);
@@ -180,7 +181,7 @@ test('Floating capsule and both action variants disable material shadows in day/
       deviceInfo: { sdkApiVersion: 26, apiAvailable: () => true },
       uiMaterial: { isImmersiveMaterialSupported: () => true, ImmersiveStyle: { THIN: 1, REGULAR: 2, THICK: 3 },
         ImmersiveMaterial: class { constructor(options) { this.options = options; } } },
-      LengthMetrics: { vp: value => ({ value, unit: 'vp' }) }, BarStyle: { STANDARD: 0, STACK: 1 }, ScrollEffectType: { GRADUAL_BLUR: 1 }
+      BarStyle: { STANDARD: 0, STACK: 1 },
     });
     for (const color of ['', '#00A36C']) {
       const value = api.immersiveFor(mode, color); const surfaces = [];
@@ -196,7 +197,25 @@ test('Floating capsule and both action variants disable material shadows in day/
   }
 });
 
- test('Both material themes reuse official blur options with a wider transition and no edge shadow',()=>{for(const mode of ['day','night']){const value=theme(26,{isImmersiveMaterialSupported:()=>true,ImmersiveStyle:{THIN:1,REGULAR:2,THICK:3},ImmersiveMaterial:class{constructor(options){this.options=options;}}},mode);const options=value.titleOptions();for(let i=0;i<100;i++)assert.equal(value.titleOptions(),options);assert.equal(options.scrollEffectOptions.scrollEffectType,1);assert.equal(options.scrollEffectOptions.blurEffectiveStartOffset.value,0);assert.equal(options.scrollEffectOptions.blurEffectiveEndOffset.value,64);assert.equal(options.scrollEffectOptions,value.titleOptions().scrollEffectOptions);assert.equal(options.backgroundColor,'#00000000');assert.ok(options.systemMaterial);assert.equal(options.systemMaterial.options.applyShadow,false);}});
+test('Both themes cache one native backdrop effect without the fling-sensitive scroll effect', () => {
+  for (const mode of ['day', 'night']) {
+    const value = theme(26, { isImmersiveMaterialSupported: () => true,
+      ImmersiveStyle: { THIN: 1, REGULAR: 2, THICK: 3 },
+      ImmersiveMaterial: class { constructor(options) { this.options = options; } } }, mode);
+    const options = value.titleOptions();
+    for (let i = 0; i < 100; i++) assert.equal(value.titleOptions(), options);
+    assert.equal(options.backgroundBlurStyle, undefined);
+    assert.equal(options.backgroundEffect.radius, 32);
+    assert.equal(options.backgroundEffect.saturation, 1.15);
+    assert.match(options.backgroundEffect.color, /^#1A[0-9A-Fa-f]{6}$/);
+    assert.equal(options.backgroundEffect, value.titleOptions().backgroundEffect);
+    assert.equal(options.scrollEffectOptions, undefined);
+    assert.equal(options.backgroundColor, '#00000000');
+    assert.equal(options.barStyle, 1);
+    assert.ok(options.systemMaterial);
+    assert.equal(options.systemMaterial.options.applyShadow, false);
+  }
+});
  test('Fallback title configuration is also stable and preserves the day/night background',()=>{for(const mode of ['day','night']){const value=theme(12,{},mode);assert.equal(value.titleOptions(),value.titleOptions());assert.equal(value.titleOptions().barStyle,0);assert.equal(value.titleOptions().scrollEffectOptions,undefined);}});
 
  test('Floating style removes the one-vp mask and clears the divider after both show and hide updates',()=>{const value=theme(26,{isImmersiveMaterialSupported:()=>true,ImmersiveStyle:{THIN:1,REGULAR:2,THICK:3},ImmersiveMaterial:class{constructor(options){this.options=options;}}});for(const visible of [true,false]){const trace=[];value.tabsStyle(visible).applyNormalAttribute({barFloatingStyle:style=>{trace.push(['floating',style]);},divider:style=>trace.push(['divider',style])});assert.equal(trace[0][0],'floating');assert.equal(trace[1][0],'divider');assert.equal(trace[1][1].strokeWidth,0);assert.equal(trace[1][1].color,'#00000000');if(visible){assert.equal(trace[0][1].maskHeight,0);assert.equal(trace[0][1].maskColor,'#00000000');assert.ok(trace[0][1].systemMaterial);}}});
