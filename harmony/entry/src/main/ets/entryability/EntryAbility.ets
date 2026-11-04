@@ -6,7 +6,7 @@ import { Personalization, PersonalizationStore } from '../service/Personalizatio
 import { UIAbility } from '@kit.AbilityKit';
 import { window } from '@kit.ArkUI';
 import { AppearanceMode } from '../model/Appearance';
-import { AppearanceStore, applyAppearance } from '../service/AppearanceStore';
+import { AppearanceStore, applyAppearance, applyColorMode } from '../service/AppearanceStore';
 
 export default class EntryAbility extends UIAbility {
   private mainWindow: window.Window | null = null;
@@ -49,6 +49,8 @@ export default class EntryAbility extends UIAbility {
     AppStorage.setOrCreate('foregroundBlurStrength', personalization.foregroundBlurStrength);
     AppStorage.setOrCreate('keyboardVisible', false);
     AppStorage.setOrCreate('keyboardObserved', false);
+    // HDS reads the system color mode when its material is created. Restore it before rendering.
+    applyColorMode(this.context, mode);
     windowStage.loadContent('pages/Index', (error) => {
       if (error.code) {
         console.error('SteamHours: unable to load the main page, code: ' + error.code.toString());

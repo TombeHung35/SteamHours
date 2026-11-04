@@ -20,15 +20,20 @@ export class AppearanceStore {
   }
 }
 
-// Call only after loadContent succeeds. Appearance errors must not disrupt library or login.
-export async function applyAppearance(context: common.UIAbilityContext, mode: AppearanceMode): Promise<void> {
-  const colors: AppColors = colorsFor(mode);
+// Apply before HDS material creation; this does not depend on a loaded window.
+export function applyColorMode(context: common.UIAbilityContext, mode: AppearanceMode): void {
   try {
     context.getApplicationContext().setColorMode(mode === 'day' ?
       ConfigurationConstant.ColorMode.COLOR_MODE_LIGHT : ConfigurationConstant.ColorMode.COLOR_MODE_DARK);
   } catch (_) {
     console.warn('SteamHours: system color mode could not be applied.');
   }
+}
+
+// Call only after loadContent succeeds. Appearance errors must not disrupt library or login.
+export async function applyAppearance(context: common.UIAbilityContext, mode: AppearanceMode): Promise<void> {
+  const colors: AppColors = colorsFor(mode);
+  applyColorMode(context, mode);
   try {
     const mainWindow: window.Window = await window.getLastWindow(context);
     // Component-level drawing expansion keeps interactive content in the native safe area.

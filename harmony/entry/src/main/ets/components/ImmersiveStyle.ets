@@ -150,12 +150,10 @@ export class ImmersiveTheme {
   }
 
   titleOptions(): NavigationTitleOptions {
-    // Keep one native backdrop behind the title and expanded status-bar area.
-    // GRADUAL_BLUR hides its filter during fast flings, then restores it on stop.
+    // Legacy Navigation only: the current-system gradient belongs to HdsNavigation.
     if (this.stableTitleOptions === undefined) {
       this.stableTitleOptions = this.enabled ?
-        { backgroundColor: '#00000000', barStyle: BarStyle.STACK, systemMaterial: this.title,
-          backgroundEffect: { radius: 32, saturation: 1.15, color: '#1A' + this.colors.background.substring(1) } } :
+        { backgroundColor: this.colors.background, barStyle: BarStyle.STACK, systemMaterial: this.title } :
         { backgroundColor: this.colors.background, barStyle: BarStyle.STANDARD };
     }
     return this.stableTitleOptions;

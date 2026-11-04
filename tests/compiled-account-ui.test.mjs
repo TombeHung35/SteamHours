@@ -19,13 +19,13 @@ const compiledFamily = readFileSync(new URL('../harmony/entry/build/default/cach
 const paletteModel = runInNewContext(stripTypeScriptTypes(appearance) + '\n;({ colorsFor })');
 const readEts = path => readFileSync(new URL('../harmony/entry/src/main/ets/' + path, import.meta.url), 'utf8').replace(/^import[^\n]*\n/gm, '').replace(/\bexport /g, '');
 const steamDataModel = runInNewContext(stripTypeScriptTypes(readEts('model/SteamData.ets')) + '\n;({ parseAccount, validateApiKey })');
-const extras = readEts('model/PrivacyAccess.ets') + '\n' + readEts('model/PrivacyPolicy.ets') + '\n' + readEts('model/BottomBarAutoHide.ets') + '\n' + readEts('components/BottomBarMotion.ets') + '\n' + readEts('model/SteamImages.ets') + '\n' + readEts('service/LibraryStore.ets');
-const code = stripTypeScriptTypes(appearance + '\n' + scrollStyle + '\n' + extras + '\n' + compiledFamily + '\n' + compiled) + '\n;({ Index, FamilyLogin, StatusBarScrollStyle, LibraryStore, BottomBarAutoHide, BottomBarMotion, privacyAccess })';
+const extras = readEts('components/OfficialTitleStyle.ets') + '\n' + readEts('model/PrivacyAccess.ets') + '\n' + readEts('model/PrivacyPolicy.ets') + '\n' + readEts('model/BottomBarAutoHide.ets') + '\n' + readEts('components/BottomBarMotion.ets') + '\n' + readEts('model/SteamImages.ets') + '\n' + readEts('service/LibraryStore.ets');
+const code = stripTypeScriptTypes(appearance + '\n' + scrollStyle + '\n' + extras + '\n' + compiledFamily + '\n' + compiled) + '\n;({ Index, FamilyLogin, StatusBarScrollStyle, LibraryStore, BottomBarAutoHide, BottomBarMotion, privacyAccess, OfficialTitleStyle })';
 
 function mount(overrides = {}) {
   const rows = { inputs: [], buttons: [], toggles: [], sliders: [], texts: [], images: [] };
   const calls = [];
-  const native = { tabBars: 0, tabBackground: 'unset', foregroundBlurs: [], backToTopCalls: [], imageErrors: [], safeAreas: [], tabClips: [], trace: [], navigationColors: [], webCreates: [], barHeights: [], overlaps: [], tabBlurStyles: [], tabDividers: [], panelBackgrounds: [], panelBorders: [], panelShadows: [], panelGradients: [], panelOpacities: [], tabsAppear: null, tabsDisappear: null, scrollCallback: null, stopCallback: null, animations: [], translations: [], opacities: [], rowHitTests: [], dialogs: [], copied: [], links: [], defaultThemes: [] };
+  const native = { hdsBarStyles: [], hdsStacks: [], hdsDestinations: [], contentPaddings: [], hdsTitles: [], hdsBindings: [], hdsAreas: [], hdsThemes: [], legacyTitles: [], tabBars: 0, tabBackground: 'unset', foregroundBlurs: [], backToTopCalls: [], imageErrors: [], safeAreas: [], tabClips: [], trace: [], navigationColors: [], webCreates: [], barHeights: [], overlaps: [], tabBlurStyles: [], tabDividers: [], panelBackgrounds: [], panelBorders: [], panelShadows: [], panelGradients: [], panelOpacities: [], tabsAppear: null, tabsDisappear: null, scrollCallback: null, stopCallback: null, animations: [], translations: [], opacities: [], rowHitTests: [], dialogs: [], copied: [], links: [], defaultThemes: [] };
   function control(collection, createName) {
     let current;
     return new Proxy({}, { get(_, method) {
@@ -67,9 +67,19 @@ function mount(overrides = {}) {
   const navigation = new Proxy({}, { get(_, method) { return (...args) => {
     if (method === 'create') native.trace.push('navigation');
     if (method === 'backgroundColor') native.navigationColors.push(args[0]);
+    if (method === 'title') native.legacyTitles.push(args[1]);
     if (method === 'expandSafeArea') native.safeAreas.push(['Navigation', ...args]);
   }; } });
-  const { Index, FamilyLogin, StatusBarScrollStyle, LibraryStore, BottomBarAutoHide, BottomBarMotion, privacyAccess } = runInNewContext(code, {
+  const hdsNavigation = new Proxy({}, { get(_, method) { return (...args) => {
+    if (method === 'create') { native.trace.push('hds-navigation'); native.hdsStacks.push(args[0]); }
+    if (method === 'navDestination') native.hdsDestinations.push(args[0]);
+    if (method === 'titleBar') native.hdsTitles.push(args[0]);
+    if (method === 'bindToScrollable') native.hdsBindings.push(args[0]);
+    if (method === 'ignoreLayoutSafeArea') native.hdsAreas.push(args);
+    if (method === 'withTheme') native.hdsThemes.push(args[0]);
+    if (method === 'systemBarStyle') native.hdsBarStyles.push(args);
+  }; } });
+  const { Index, FamilyLogin, StatusBarScrollStyle, LibraryStore, BottomBarAutoHide, BottomBarMotion, privacyAccess, OfficialTitleStyle } = runInNewContext(code, {
     parseAccount: steamDataModel.parseAccount, validateApiKey: steamDataModel.validateApiKey, TransitionType: { All: 0 },
     SafeAreaType: { SYSTEM: 1, KEYBOARD: 2 }, SafeAreaEdge: { TOP: 0, BOTTOM: 1 },
     STEAM_TOKEN_URL:'https://store.steampowered.com/pointssummary/ajaxgetasyncconfig',
@@ -78,7 +88,11 @@ function mount(overrides = {}) {
       if (method === 'create') native.webCreates.push(args[0]);
       if (method === 'expandSafeArea') native.safeAreas.push(['Web', ...args]);
     }; } }),
-    deviceInfo: { sdkApiVersion: overrides.platformSdk ?? 26 }, $r: value => value,
+    deviceInfo: { sdkApiVersion: overrides.platformSdk ?? 26, distributionOSApiVersion: (overrides.platformSdk ?? 26) >= 26 ? 260000 : 0, apiAvailable: () => (overrides.platformSdk ?? 26) >= 26 },
+    canIUse: () => overrides.hdsAvailable === true,
+    HdsNavigation: hdsNavigation, HdsNavDestination: passive, HdsNavigationTitleMode: { MINI: 0 },
+    HdsScrollEffectType: { IMMERSIVE_GRADIENT_BLUR: 3 }, hdsMaterial: { MaterialType: { ADAPTIVE: 100 }, MaterialLevel: { ADAPTIVE: 10 } },
+    LayoutSafeAreaType: { SYSTEM: 1 }, LayoutSafeAreaEdge: { TOP: 0, BOTTOM: 1 }, $r: value => value,
     HorizontalAlign: { Start: 0, Center: 1, End: 2 }, Divider: passive,
     TextOverflow: { Ellipsis: 1 }, TextAlign: { Center: 1 }, Progress: passive, ProgressType: { Linear: 1 }, HoverEffect: { Scale: 1 },
     formatHours: libraryModel.formatHours,
@@ -87,6 +101,7 @@ function mount(overrides = {}) {
     ThemeControl:{setDefaultTheme:theme=>native.defaultThemes.push(theme)},applyAppearance:async()=>{},
     ViewPU, NavPathStack: class {}, registerNamedRoute: () => {},
     Column: new Proxy({}, {get(_,method){return value=>{
+      if(method==='padding')native.contentPaddings.push(value);
       if(method==='backgroundColor')native.panelBackgrounds.push(value);
       if(method==='border')native.panelBorders.push(value);
       if(method==='shadow')native.panelShadows.push(value);
@@ -118,7 +133,7 @@ function mount(overrides = {}) {
   const values = {
     privacyStatus:'granted', privacyMessage:'',privacyBusy:false,librarySaving:false,infoReturnPage:'settings',supportMessage:'',dataGeneration:0,privacyStore:{choose:async()=>{}},localDataCleaner:{clear:async()=>{}},
     artworkUrls:{},artworkAttempted:new Set(),artworkLoading:false,artworkApi:{load:async()=>({}),clearCache(){}},
-    prefs: null, account: 'parent-account', apiKey: 'test-only-key', familyToken: '',
+    officialTitle: new OfficialTitleStyle(), prefs: null, account: 'parent-account', apiKey: 'test-only-key', familyToken: '',
     includeFamily: false, rememberKey: true, loading: false, settingsReady: true,
     savingSettings: false, settingsMessage: '', errorText: '', editingInput: false,
     colorMode: 'night', themeColor: '', themeColorDraft: '', imageThemePalette: [], imageThemeMessage: '', appearanceMessage: '', personalizationBusy: false, appearanceSaving: false, backgroundPath: '', backgroundOpacity: 0.22, panelTransparency: 0.25, foregroundBlurStrength: 0.4, library: { demo: true }, mainPage: 'accounts',
@@ -150,7 +165,7 @@ function mount(overrides = {}) {
   owner.accounts();
   function family(mode) {
     const login = Object.create(FamilyLogin.prototype);
-    const familyValues = { privacyGeneration:privacyAccess.begin(), active:true,colorMode: mode, themeColor: '', message: 'test-login-message', reading: false,
+    const familyValues = { officialTitle: new OfficialTitleStyle(), privacyGeneration:privacyAccess.begin(), active:true,colorMode: mode, themeColor: '', message: 'test-login-message', reading: false,
       webReady: false, controller: {},unregister:()=>{}, colors: () => paletteModel.colorsFor(mode), theme: values.theme,
       observeComponentCreation2: values.observeComponentCreation2, ifElseBranchUpdateFunction: values.ifElseBranchUpdateFunction };
     for (const [key, value] of Object.entries(familyValues)) Object.defineProperty(login, key, { value, writable: true, configurable: true });
@@ -594,3 +609,53 @@ test('Artwork metadata refresh is batched per visible library and rejects a resp
 test('Declined account cannot open family login or accept an old authorization callback',async()=>{const m=mount({privacyStatus:'declined',familyToken:'',includeFamily:false});const button=m.rows.buttons.find(b=>b.value==='登录 Steam');assert.equal(button.enabled,false);button.onClick();assert.ok(!m.calls.includes('openFamily'));await m.owner.authorizeFamily('late-token');assert.equal(m.owner.familyToken,'');assert.equal(m.owner.includeFamily,false);});
 test('Family page discards JavaScript authorization result after consent is revoked',async()=>{let finish;const m=mount();const login=m.family('night');login.reading=true;login.controller={runJavaScript:()=>new Promise(resolve=>finish=resolve),loadUrl:()=>{throw Error('must not reload');}};let authorized=0;login.onAuthorized=()=>authorized++;const pending=login.pageEnded('https://store.steampowered.com/pointssummary/ajaxgetasyncconfig');await new Promise(resolve=>setImmediate(resolve));assert.equal(typeof finish,'function');m.privacyAccess.setAllowed(false);finish('secret');await pending;assert.equal(authorized,0);});
 test('Compiled image update reads new metadata directly and keeps the URL captured by older error callbacks',()=>{const m=mount({mainPage:'library',library:realLibrary()}),game={appId:400,name:'Portal',iconUrl:''};let updateImage;m.owner.observeComponentCreation2=callback=>{const count=m.rows.images.length;callback(1,true);if(m.rows.images.length>count)updateImage=callback;};m.owner.gameArtwork(game);const oldError=m.native.imageErrors.at(-1);const changed='https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/400/abc/library_capsule.jpg';m.owner.artworkUrls={'400':[changed]};assert.equal(typeof updateImage,'function');updateImage(1,false);assert.equal(m.rows.images.at(-1),changed);oldError();assert.equal(m.owner.artworkFailures['400'],undefined);m.native.imageErrors.at(-1)();assert.equal(m.owner.artworkFailures['400'],1);});
+
+
+test('Current-system main pages use HDS immersive gradient, bind their real Scroll, and never draw a second native title', () => {
+  for (const mode of ['day', 'night']) for (const page of ['library', 'accounts', 'settings', 'privacy', 'about', 'support']) {
+    const m = mount({ hdsAvailable: true, colorMode: mode, mainPage: page, library: realLibrary(), colors: () => paletteModel.colorsFor(mode) });
+    m.owner.initialRender();
+    assert.ok(m.native.trace.includes('hds-navigation'));
+    assert.equal(m.native.trace.includes('navigation'), false);
+    assert.equal(m.native.legacyTitles.length, 0);
+    assert.equal(m.native.hdsTitles.length, 1);
+    assert.equal(m.native.hdsStacks[0], m.owner.pageStack);
+    assert.equal(m.native.hdsDestinations.length, 1);
+    const title = m.native.hdsTitles[0];
+    assert.equal(title.style.scrollEffectOpts.scrollEffectType, 3);
+    assert.equal(title.style.scrollEffectOpts.enableScrollEffect, false);
+    assert.equal(title.style.systemMaterialEffect.materialType, 100);
+    assert.equal(m.native.hdsBindings.length, 1);
+    assert.equal(m.native.hdsBindings[0][0], m.owner.scroller);
+    assert.deepEqual(Array.from(m.native.hdsAreas[0][1]), [0, 1]);
+    assert.equal(m.native.hdsThemes[0].enableThemeColorMode, true);
+    const barStyles = m.native.hdsBarStyles[0];
+    assert.equal(barStyles[0].statusBarContentColor, paletteModel.colorsFor(mode).text);
+    assert.equal(barStyles[1].statusBarContentColor, barStyles[0].statusBarContentColor);
+    assert.equal(m.native.tabBars, 1);
+    assert.ok(m.native.contentPaddings.some(value => value && value.top === 92 && value.bottom === 112));
+    title.content.stackBuilder();
+    assert.ok(m.rows.texts.some(row => row.value === 'STEAM HOURS' || row.value === '色彩 · 背景 · 光感' || row.value === '连接你的 Steam'));
+  }
+});
+
+test('Unsupported systems keep the legacy navigation and never create HDS components', () => {
+  for (const platformSdk of [12, 15, 20, 25, 26]) {
+    const m = mount({ platformSdk, hdsAvailable: false, library: realLibrary() });
+    m.owner.initialRender(); assert.ok(m.native.trace.includes('navigation'));
+    assert.equal(m.native.hdsTitles.length, 0); assert.equal(m.native.tabBars, 1);
+  }
+});
+
+test('Family login also uses the official HDS header while preserving Web bounds and close callback', () => {
+  for (const mode of ['day', 'night']) {
+    const m = mount({ hdsAvailable: true }); const login = m.family(mode); login.initialRender();
+    assert.equal(m.native.hdsTitles.length, 1); assert.equal(m.native.legacyTitles.length, 0);
+    assert.ok(m.native.hdsBarStyles[0].every(style => style.statusBarContentColor === paletteModel.colorsFor(mode).text));
+    assert.equal(m.native.webCreates.length, 1);
+    assert.ok(m.native.contentPaddings.some(value => value && value.top === 112 && value.bottom === 16));
+    assert.equal(m.native.safeAreas.some(event => event[0] === 'Web'), false);
+    m.native.hdsTitles[0].content.stackBuilder();
+    assert.ok(m.rows.buttons.some(row => row.value === '返回'));
+  }
+});

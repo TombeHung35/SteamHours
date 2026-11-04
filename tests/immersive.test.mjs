@@ -113,7 +113,7 @@ test('Official bottom bar restores when the keyboard opens and does not create n
   assert.equal(calls[2].systemMaterial, initial.systemMaterial);
   assert.equal(calls[2].maskColor, '#00000000');
   assert.equal(calls[2].maskHeight, 0);
-  assert.equal(value.titleOptions().backgroundEffect.radius, 32);
+  assert.equal(value.titleOptions().backgroundEffect, undefined);
   assert.equal(value.titleOptions().scrollEffectOptions, undefined);
 });
 
@@ -197,7 +197,7 @@ test('Floating capsule and both action variants disable material shadows in day/
   }
 });
 
-test('Both themes cache one native backdrop effect without the fling-sensitive scroll effect', () => {
+test('Legacy titles remain stable without a rectangular blur behind the HDS gradient', () => {
   for (const mode of ['day', 'night']) {
     const value = theme(26, { isImmersiveMaterialSupported: () => true,
       ImmersiveStyle: { THIN: 1, REGULAR: 2, THICK: 3 },
@@ -205,12 +205,9 @@ test('Both themes cache one native backdrop effect without the fling-sensitive s
     const options = value.titleOptions();
     for (let i = 0; i < 100; i++) assert.equal(value.titleOptions(), options);
     assert.equal(options.backgroundBlurStyle, undefined);
-    assert.equal(options.backgroundEffect.radius, 32);
-    assert.equal(options.backgroundEffect.saturation, 1.15);
-    assert.match(options.backgroundEffect.color, /^#1A[0-9A-Fa-f]{6}$/);
-    assert.equal(options.backgroundEffect, value.titleOptions().backgroundEffect);
+    assert.equal(options.backgroundEffect, undefined);
     assert.equal(options.scrollEffectOptions, undefined);
-    assert.equal(options.backgroundColor, '#00000000');
+    assert.match(options.backgroundColor, /^#[0-9A-Fa-f]{6}$/);
     assert.equal(options.barStyle, 1);
     assert.ok(options.systemMaterial);
     assert.equal(options.systemMaterial.options.applyShadow, false);

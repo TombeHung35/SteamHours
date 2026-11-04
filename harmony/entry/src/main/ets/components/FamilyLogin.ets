@@ -1,3 +1,6 @@
+import { deviceInfo } from '@kit.BasicServicesKit';
+import { HdsNavigation, HdsNavigationTitleMode } from '@kit.UIDesignKit';
+import { OfficialTitleStyle } from './OfficialTitleStyle';
 import { privacyAccess } from '../model/PrivacyAccess';
 import { AppearanceMode, AppColors, colorsFor } from '../model/Appearance';
 import { webview } from '@kit.ArkWeb';
@@ -14,6 +17,7 @@ export struct FamilyLogin {
   @Prop colorMode: AppearanceMode = 'night';
   @Prop themeColor: string = '';
 
+  private officialTitle: OfficialTitleStyle = new OfficialTitleStyle();
   private colors(): AppColors { return colorsFor(this.colorMode, this.themeColor); }
   private theme(): ImmersiveTheme { return immersiveFor(this.colorMode, this.themeColor); }
   private active: boolean = true;
@@ -68,9 +72,8 @@ export struct FamilyLogin {
       }.width('100%').height('100%').padding({ left: 16, right: 16 })
   }
 
-  build() {
-    Stack() {
-      Navigation() {
+  @Builder
+  private loginContent() {
       Column({ space: 12 }) {
         Text('store.steampowered.com · Steam 官方页面').fontSize(12).fontColor(this.colors().accent).width('100%')
         Text(this.message).fontSize(12).fontColor(this.colors().body).lineHeight(19).width('100%')
@@ -104,11 +107,27 @@ export struct FamilyLogin {
         }.layoutWeight(1).width('100%').backgroundColor(this.colors().surface).borderRadius(20)
           .border({ width: 1, color: this.colors().edge }).clip(true)
           .shadow({ radius: 16, color: this.colors().shadow, offsetY: 4 })
-      }.padding({ left: 16, right: 16, top: this.theme().enabled ? 88 : 16, bottom: 16 })
+      }.padding({ left: 16, right: 16, top: this.officialTitle.supported ? 112 : (this.theme().enabled ? 88 : 16), bottom: 16 })
         .width('100%').height('100%').backgroundColor(this.colors().background)
-      }.width('100%').height('100%').backgroundColor(this.colors().background)
+  }
+
+  build() {
+    Stack() {
+      if (deviceInfo.apiAvailable('26.0.0') && this.officialTitle.supported) {
+          HdsNavigation() { this.loginContent() }
+          .width('100%').height('100%').backgroundColor(this.colors().background)
+          .mode(NavigationMode.Stack).hideBackButton(true).titleMode(HdsNavigationTitleMode.MINI)
+          .titleBar({ avoidLayoutSafeArea: false, enableComponentSafeArea: false,
+            content: { stackBuilder: (): void => this.loginTitle() }, style: this.officialTitle.options() })
+          .withTheme({ enableThemeColorMode: true })
+          .systemBarStyle({ statusBarContentColor: this.colors().text }, { statusBarContentColor: this.colors().text })
+          .ignoreLayoutSafeArea([LayoutSafeAreaType.SYSTEM], [LayoutSafeAreaEdge.TOP, LayoutSafeAreaEdge.BOTTOM])
+      } else {
+        Navigation() { this.loginContent() }
+        .width('100%').height('100%').backgroundColor(this.colors().background)
         .mode(NavigationMode.Stack).hideBackButton(true).titleMode(NavigationTitleMode.Mini)
         .title({ builder: () => this.loginTitle(), height: 72 }, this.theme().titleOptions())
+      }
     }.width('100%').height('100%').backgroundColor(this.colors().background)
     .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
   }

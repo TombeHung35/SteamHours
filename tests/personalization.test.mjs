@@ -227,7 +227,7 @@ test('EntryAbility restores saved card transparency before initial content rende
     PrivacyStore:class {async read(){return 'granted';}}, LocalDataCleaner:class {}, privacyAccess:{setAllowed(){}},
     UIAbility:class {},AppearanceStore:class {async read(){return 'day';}},
     PersonalizationStore:class {async read(){return {themeColor:'',backgroundPath:'',backgroundOpacity:0.22,foregroundBlurStrength:0.4,panelTransparency:0.65};}},
-    AppStorage:{setOrCreate:(key,value)=>events.push([key,value])},applyAppearance:()=>{},console
+    AppStorage:{setOrCreate:(key,value)=>events.push([key,value])},applyAppearance:()=>{},applyColorMode:()=>{},console
   });
   const ability=new api.EntryAbility();ability.context={};
   await ability.loadMainPage({loadContent:()=>events.push(['render'])});

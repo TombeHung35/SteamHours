@@ -1,5 +1,7 @@
+import { HdsNavigation, HdsNavDestination, HdsNavigationTitleMode } from '@kit.UIDesignKit';
+import { OfficialTitleStyle } from '../components/OfficialTitleStyle';
 import { ArtworkApi } from '../service/ArtworkApi';
-import { pasteboard } from '@kit.BasicServicesKit';
+import { deviceInfo, pasteboard } from '@kit.BasicServicesKit';
 import { privacyAccess } from '../model/PrivacyAccess';
 import { PrivacyStatus, PrivacySection, PRIVACY_SECTIONS, POLICY_REVISION, DEVELOPER_NAME, SUPPORT_URL, APP_VERSION } from '../model/PrivacyPolicy';
 import { PrivacyStore } from '../service/PrivacyStore';
@@ -84,6 +86,7 @@ struct Index {
   private bottomBarMounted: boolean = false;
   @StorageLink('keyboardVisible') @Watch('inputVisibilityChanged') private keyboardVisible: boolean = false;
   @StorageLink('keyboardObserved') @Watch('inputVisibilityChanged') private keyboardObserved: boolean = false;
+  private officialTitle: OfficialTitleStyle = new OfficialTitleStyle();
   private scroller: Scroller = new Scroller();
   private statusBarScrollStyle: StatusBarScrollStyle = new StatusBarScrollStyle();
   @State private pageStack: NavPathStack = new NavPathStack();
@@ -1011,10 +1014,19 @@ struct Index {
   @Builder
   private destination(name: string) {
     if (name === 'family' && this.hasConsent()) {
+      if (deviceInfo.apiAvailable('26.0.0') && this.officialTitle.supported) {
+      HdsNavDestination() {
+        FamilyLogin({ colorMode: this.colorMode, themeColor: this.themeColor,
+          onAuthorized: (token: string) => { this.authorizeFamily(token); }, onClosed: () => this.closeAccountPage() })
+      }.hideTitleBar(true)
+      .systemBarStyle({ statusBarContentColor: this.colors().text }, { statusBarContentColor: this.colors().text })
+      .onBackPressed(() => { this.closeAccountPage(); return true; })
+      } else {
       NavDestination() {
         FamilyLogin({ colorMode: this.colorMode, themeColor: this.themeColor,
           onAuthorized: (token: string) => { this.authorizeFamily(token); }, onClosed: () => this.closeAccountPage() })
       }.hideTitleBar(true).onBackPressed(() => { this.closeAccountPage(); return true; })
+      }
     }
   }
   @Builder
@@ -1131,7 +1143,7 @@ struct Index {
         Text(this.mainPage === 'settings' ? '色彩 · 背景 · 光感' : (this.mainPage === 'accounts' ? '连接你的 Steam' : 'STEAM HOURS'))
         .fontSize(10).letterSpacing(1).fontColor(this.colors().accent)
       }.alignItems(HorizontalAlign.Start).layoutWeight(1)
-    }.width('100%').height('100%').padding({ left: 20, right: 20, top: 14, bottom: 14 })
+    }.width('100%').height('100%').padding({ left: 20, right: 20, top: this.officialTitle.supported ? 6 : 14, bottom: this.officialTitle.supported ? 6 : 14 })
   }
 
   @Builder
@@ -1183,13 +1195,24 @@ struct Index {
     .enabled(this.bottomBarVisible() && this.privacyStatus !== 'pending' && this.privacyStatus !== 'blocked')
     .hitTestBehavior(this.bottomBarVisible() ? HitTestMode.Default : HitTestMode.None)
   }
-  build() {
-    WithTheme({ theme: this.customTheme(), colorMode: this.colorMode === 'day' ? ThemeColorMode.LIGHT : ThemeColorMode.DARK }) {
-      Stack() {
-        // The full-page decoration is a sibling of Navigation, so it reaches both system bars.
-        this.ambientBackground()
-        Column() {
-          Navigation(this.pageStack) {
+  @Builder
+  private officialNavigation() {
+    if (deviceInfo.apiAvailable('26.0.0')) {
+    HdsNavigation(this.pageStack) { this.pageContent() }
+    .width('100%').height('100%').backgroundColor('#00000000')
+    .mode(NavigationMode.Stack).hideBackButton(true).titleMode(HdsNavigationTitleMode.MINI)
+    .titleBar({ avoidLayoutSafeArea: false, enableComponentSafeArea: false,
+      content: { stackBuilder: (): void => this.pageTitle() }, style: this.officialTitle.options() })
+    .withTheme({ enableThemeColorMode: true })
+    .systemBarStyle({ statusBarContentColor: this.colors().text }, { statusBarContentColor: this.colors().text })
+    .bindToScrollable([this.scroller])
+    .ignoreLayoutSafeArea([LayoutSafeAreaType.SYSTEM], [LayoutSafeAreaEdge.TOP, LayoutSafeAreaEdge.BOTTOM])
+    .navDestination(this.destination).onAppear(() => this.navigation.markReady())
+    }
+  }
+
+  @Builder
+  private pageContent() {
             Tabs({ barPosition: BarPosition.End, controller: this.tabsController }) {
               // Library, accounts and settings share the same persistent native floating bar.
               TabContent() {
@@ -1323,7 +1346,7 @@ struct Index {
                         }, (notice: string) => notice)
                         Text('基于 Steam 公开数据 · 非 Valve 官方应用').fontSize(10).fontColor(this.colors().muted).padding({ top: 8, bottom: 12 })
                       }
-                    }.padding({ left: 20, right: 20, top: this.theme().enabled ? 92 : 12, bottom: 112 }).width('100%')
+                    }.padding({ left: 20, right: 20, top: this.officialTitle.supported || this.theme().enabled ? 92 : 12, bottom: 112 }).width('100%')
                   }.height('100%').width('100%').scrollBar(BarState.Off)
                   // Extend the viewport itself; expanding only decoration leaves a clipped strip above the home indicator.
                   .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.BOTTOM])
@@ -1344,6 +1367,18 @@ struct Index {
             .attributeModifier(this.theme().tabsStyle(this.bottomBarLayoutVisible(), this.viewportWidth))
             .onAppear(() => { this.bottomBarMotion.reset(); this.bottomBarMounted = true; this.syncBottomBar(false); })
             .onDisAppear(() => { this.bottomBarMounted = false; this.bottomBarMotion.reset(); })
+  }
+
+  build() {
+    WithTheme({ theme: this.customTheme(), colorMode: this.colorMode === 'day' ? ThemeColorMode.LIGHT : ThemeColorMode.DARK }) {
+      Stack() {
+        // The full-page decoration is a sibling of Navigation, so it reaches both system bars.
+        this.ambientBackground()
+        Column() {
+          if (this.officialTitle.supported) { this.officialNavigation() }
+          else {
+          Navigation(this.pageStack) {
+            this.pageContent()
           }.width('100%').height('100%').backgroundColor('#00000000').mode(NavigationMode.Stack).hideBackButton(true)
           // Extend the same native title backdrop across the status bar without changing control insets.
           .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
@@ -1351,6 +1386,7 @@ struct Index {
           .title({ builder: this.pageTitle, height: 80 }, this.theme().titleOptions())
           .navDestination(this.destination)
           .onAppear(() => this.navigation.markReady())
+          }
         }.width('100%').height('100%').backgroundColor('#00000000')
         .onAreaChange((_oldArea: Area, newArea: Area) => {
           const width: number = Number(newArea.width);
